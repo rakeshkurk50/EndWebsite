@@ -11,7 +11,7 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
-const MONGO_URI = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/user_registration_app';
+const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://rakesh_db:hellouser1234A@cluster0.6yqatas.mongodb.net/user_registration_app?retryWrites=true&w=majority';
 
 mongoose.connect(MONGO_URI, {
 	useNewUrlParser: true,
