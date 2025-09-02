@@ -1,0 +1,61 @@
+*{box-sizing:border-box;font-family:Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial}
+body{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background-color:#1f6f4a}
+/* Background wrapper to host image and dark overlay for readability */
+.bg-wrap{position:fixed;inset:0;z-index:-1;overflow:hidden}
+.bg-wrap img{width:100%;height:100%;object-fit:cover;filter:brightness(0.6) saturate(0.9);}
+.container{max-width:920px;width:100%;display:flex;flex-direction:column;gap:20px;align-items:center;z-index:1;padding:12px}
+
+/* Card base */
+.card{background:rgba(255,255,255,0.98);border-radius:14px;box-shadow:0 10px 30px rgba(2,6,23,0.14);padding:28px;width:100%;max-width:840px;transition:transform .18s ease,box-shadow .18s ease}
+.card:hover{transform:translateY(-4px);box-shadow:0 18px 40px rgba(2,6,23,0.18)}
+
+/* Form card - dark theme */
+.form-card{background:linear-gradient(180deg,#0f172a,#062733);color:#e6eefc;padding:32px}
+.form-card h2{margin:0 0 14px;color:#e6eefc;text-align:center}
+
+/* List card headings */
+.list-card h2{margin:0 0 18px;color:#07203a;text-align:center;font-size:28px}
+
+/* Form rows - align label and input horizontally */
+.row{margin-bottom:14px;display:flex;align-items:center;gap:18px}
+.row label{font-weight:800;margin-bottom:0;color:#dbeafe;width:160px;text-align:left}
+.row input{padding:12px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.03);outline:none;color:#e6eefc;flex:1;min-width:0}
+.row input::placeholder{color:rgba(230,238,252,0.55)}
+.row input:focus{box-shadow:0 6px 18px rgba(5,150,105,0.12);border-color:rgba(99,102,241,0.9);background:rgba(255,255,255,0.06)}
+
+/* Three column group: stack label above input to avoid overflow, and make inputs responsive */
+.row.three-col{display:flex;gap:12px;align-items:flex-start}
+.row.three-col > div{flex:1;display:flex;flex-direction:column;min-width:0}
+.row.three-col label{width:auto;margin-bottom:8px;color:#dbeafe}
+.row.three-col input{width:100%}
+
+/* Buttons and actions */
+.actions{display:flex;gap:12px;align-items:center;justify-content:center;margin-top:8px}
+.btn{padding:10px 16px;border-radius:10px;border:1px solid transparent;background:transparent;color:#0f172a;cursor:pointer;font-weight:700}
+.form-card .btn{background:transparent;color:#cfeaf1;border:1px solid rgba(255,255,255,0.06)}
+.btn.primary{background:#06b6a4;color:#042b27;border:none}
+
+/* Users list styling: improved card with avatar and accent */
+.hidden{display:none}
+#usersList{display:grid;grid-template-columns:1fr;gap:14px;max-height:520px;overflow:auto}
+.user-item{display:flex;gap:16px;align-items:flex-start;padding:16px;border-radius:12px;border-left:6px solid rgba(6,182,160,0.12);background:linear-gradient(180deg,#ffffff,#f6fbff);transition:transform .16s ease,box-shadow .16s ease}
+.user-item:hover{transform:translateY(-6px);box-shadow:0 14px 30px rgba(2,6,23,0.06);background:linear-gradient(180deg,#fff,#f0f9ff)}
+.user-avatar{width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#06b6a4,#2563eb);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:18px;flex-shrink:0}
+.user-content{flex:1}
+.user-content h4{margin:0 0 6px;color:#07203a}
+.user-meta{font-size:14px;color:#475569;margin-bottom:6px}
+.user-address{font-size:13px;color:#334155;margin-bottom:6px}
+.user-time{font-size:12px;color:#64748b}
+
+/* Toast */
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:28px;background:#0f172a;color:#fff;padding:12px 18px;border-radius:999px;box-shadow:0 8px 24px rgba(2,6,23,0.2);opacity:0;pointer-events:none;transition:opacity .3s ease,transform .3s ease}
+.toast.show{opacity:1;pointer-events:auto;transform:translateX(-50%) translateY(-6px)}
+
+/* Responsive: stack label above input on small screens */
+@media (max-width:740px){
+	.card{padding:18px}
+	.row{flex-direction:column;align-items:stretch}
+	.row label{width:auto;margin-bottom:8px}
+	.row.three-col{flex-direction:column}
+	.row.three-col > div{flex-direction:column;align-items:stretch}
+}
