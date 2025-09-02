@@ -25,6 +25,21 @@ const API_BASE = (location.hostname === 'localhost' || location.hostname === '12
 	? 'http://localhost:4000'
 	: '';
 
+async function postUser(payload){
+	try{
+		const res = await fetch(`${API_BASE}/api/users`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify(payload)
+		});
+		const body = await res.json().catch(()=>({}));
+		if (!res.ok) throw new Error(body.error || body.message || `${res.status} ${res.statusText}`);
+		return body;
+	}catch(e){
+		throw e;
+	}
+}
+
 form.addEventListener('submit', async (e) => {
 	e.preventDefault();
 	const formData = new FormData(form);
@@ -32,7 +47,7 @@ form.addEventListener('submit', async (e) => {
 	for (const [k, v] of formData.entries()) payload[k] = v;
 
 	// Client-side validation
-	if (!/^\d{10}$/.test(payload.mobile || '')){
+	if (!/^\d{10}$/.test((payload.mobile||'').replace(/\D/g,''))){
 		showToast('Please enter a valid 10 digit mobile number');
 		return;
 	}
@@ -46,23 +61,14 @@ form.addEventListener('submit', async (e) => {
 	}
 
 	try {
-		const res = await fetch(`${API_BASE}/api/users`, {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify(payload)
-		});
-		if (!res.ok) {
-			const errBody = await res.json().catch(() => ({}));
-			throw new Error(errBody.error || `${res.status} ${res.statusText}`);
-		}
+		const data = await postUser(payload);
 		form.reset();
-		// Load users and show the users view immediately
 		await loadUsers();
 		usersCard.classList.remove('hidden');
 		document.querySelector('.form-card').classList.add('hidden');
 		showToast('User registered successfully');
 	} catch (err) {
-		showToast(err.message || 'Error saving user');
+		showToast(err.message || 'Error saving user', 5000);
 		console.error(err);
 	}
 });

@@ -22,7 +22,7 @@ mongoose.connect(MONGO_URI, {
 const userSchema = new mongoose.Schema({
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
-    mobile: { type: String, required: true, match: [/^\\d{10}$/, 'Mobile must be 10 digits'] },
+    mobile: { type: String, required: true, match: [/^\d{10}$/, 'Mobile must be 10 digits'] },
     email: { type: String, required: true, unique: true },
     address: { type: String },
     street: { type: String },
@@ -38,7 +38,25 @@ const User = mongoose.model('User', userSchema);
 
 app.post('/api/users', async (req, res) => {
     try {
-        const user = new User(req.body);
+        // Sanitize and normalize input
+        const input = Object.assign({}, req.body);
+        if (input.mobile) input.mobile = String(input.mobile).replace(/\D/g, '');
+        if (input.email) input.email = String(input.email).trim().toLowerCase();
+        if (input.username) input.username = String(input.username).trim();
+
+        // Early validation for mobile to return a clear error
+        if (!input.mobile || !/^\d{10}$/.test(input.mobile)) {
+            // Debug logging: show sanitized value, length and char codes
+            try {
+                const val = input.mobile || '';
+                console.error('Invalid mobile after sanitize:', JSON.stringify(val), 'len=', val.length, 'codes=', Array.from(val).map(c => c.charCodeAt(0)));
+            } catch (e) {
+                console.error('Failed logging mobile debug', e);
+            }
+            return res.status(400).json({ error: 'Mobile must be 10 digits' });
+        }
+
+        const user = new User(input);
         await user.save();
         console.log('User saved:', user._id);
         res.status(201).json(user);
