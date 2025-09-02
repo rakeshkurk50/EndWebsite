@@ -20,10 +20,17 @@ function showToast(message, timeout = 2500){
 	setTimeout(() => toast.classList.remove('show'), timeout);
 }
 
-// If the page is NOT served from the backend (port 4000), point API calls to the backend URL.
-const API_BASE = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') && location.port !== '4000'
-	? 'http://localhost:4000'
-	: '';
+// Determine API base. Default to same origin, but when the page is served
+// from Live Server (typically port 5500) point to the backend on port 4000.
+// This prevents POSTs from going to the static file server which returns 405.
+let API_BASE = '';
+try {
+	if ((location.hostname === '127.0.0.1' || location.hostname === 'localhost') && location.port && location.port !== '4000') {
+ 		API_BASE = location.protocol + '//' + location.hostname + ':4000';
+ 	}
+} catch (e) {
+ 	// If location is not available (e.g., non-browser environment), keep default
+}
 
 async function postUser(payload){
 	try{
