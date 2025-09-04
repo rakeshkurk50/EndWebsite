@@ -21,12 +21,12 @@ function showToast(message, timeout = 2500){
 }
 
 // Determine API base. Default to same origin, but when the page is served
-// from Live Server (typically port 5500) point to the backend on port 4000.
+// from Live Server (typically port 5500) point to the backend on port 3000.
 // This prevents POSTs from going to the static file server which returns 405.
 let API_BASE = '';
 try {
-	if ((location.hostname === '127.0.0.1' || location.hostname === 'localhost') && location.port && location.port !== '4000') {
- 		API_BASE = location.protocol + '//' + location.hostname + ':4000';
+	if ((location.hostname === '127.0.0.1' || location.hostname === 'localhost') && location.port && location.port !== '3000') {
+ 		API_BASE = location.protocol + '//' + location.hostname + ':3000';
  	}
 } catch (e) {
  	// If location is not available (e.g., non-browser environment), keep default

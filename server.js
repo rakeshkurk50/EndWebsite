@@ -1,46 +1,24 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const dotenv=require('dotenv');
+dotenv.config();
 // bodyParser replaced by built-in express.json()
 const cors = require('cors');
 const path = require('path');
 
 const app = express();
-const PORT = process.env.PORT || 4000;
+const PORT = process.env.PORT;
 
 app.use(cors());
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://rakesh_db:hellouser1234A@cluster0.6yqatas.mongodb.net/user_registration_app?retryWrites=true&w=majority';
+// Connect using the reusable dbConnect utility which reads MONGO_URI from env
+const dbConnect = require('./utils/dbConnect');
+dbConnect().then(() => console.log('✅ Database connected')).catch(err => console.error('❌ Database connection failed:', err));
 
-mongoose.connect(MONGO_URI, {
-	useNewUrlParser: true,
-	useUnifiedTopology: true,
-}).then(() => console.log('Connected to MongoDB'))
-  .catch(err => console.error('MongoDB connection error:', err));
-
-// Log mongoose connection events for better diagnostics
-mongoose.connection.on('connected', () => console.log('Mongoose connected')); 
-mongoose.connection.on('error', (err) => console.error('Mongoose connection error:', err));
-mongoose.connection.on('disconnected', () => console.log('Mongoose disconnected'));
-mongoose.connection.on('reconnected', () => console.log('Mongoose reconnected'));
-
-const userSchema = new mongoose.Schema({
-    firstName: { type: String, required: true },
-    lastName: { type: String, required: true },
-    mobile: { type: String, required: true, match: [/^\d{10}$/, 'Mobile must be 10 digits'] },
-    email: { type: String, required: true, unique: true },
-    address: { type: String },
-    street: { type: String },
-    city: { type: String },
-    state: { type: String },
-    country: { type: String },
-    username: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    createdAt: { type: Date, default: Date.now }
-});
-
-const User = mongoose.model('User', userSchema);
+const User = require('./models/User');
 
 // Ensure indexes (unique constraints) are created and log any index errors
 User.init().then(() => console.log('User indexes ensured')).catch(err => console.error('User.init() error:', err));
@@ -122,15 +100,19 @@ app.get('/api/users', async (req, res) => {
 
 // Health endpoint for deployment diagnostics
 app.get('/health', (req, res) => {
-    const state = mongoose.connection.readyState; // 0 disconnected, 1 connected, 2 connecting, 3 disconnecting
+    const state = mongoose.connection && mongoose.connection.readyState ? mongoose.connection.readyState : 0; // 0 disconnected, 1 connected, 2 connecting, 3 disconnecting
     res.json({ ok: true, mongoReadyState: state, env: process.env.NODE_ENV || 'undefined' });
 });
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+// SPA fallback: serve index.html for non-API GET requests
+app.get('*', (req, res, next) => {
+    if (req.method !== 'GET' || req.path.startsWith('/api/') || req.path === '/health') return next();
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 // Global error handler (returns JSON)
 app.use((err, req, res, next) => {
-    console.error('Unhandled error middleware caught:', err);
+    console.error('🔥 Server Error:', err.stack || err);
     const status = err.status || 500;
     const out = { error: err.message || 'Internal Server Error' };
     if (process.env.DEBUG === 'true') out.stack = err.stack;
@@ -144,3 +126,5 @@ process.on('unhandledRejection', (reason, p) => {
 process.on('uncaughtException', (err) => {
     console.error('Uncaught Exception thrown:', err);
 });
+
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));

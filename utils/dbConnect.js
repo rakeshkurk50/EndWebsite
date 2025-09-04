@@ -1,37 +1,22 @@
+// utils/dbConnect.js
 const mongoose = require('mongoose');
+const dotenv=require('dotenv');
+dotenv.config();
 
-let cached = global.mongoose;
+function dbConnect() {
+  const mongoUri = process.env.MONGO_URI;
 
-if (!cached) {
-    cached = global.mongoose = { conn: null, promise: null };
-}
-
-async function dbConnect() {
-    if (cached.conn) {
-        return cached.conn;
-    }
-
-    if (!cached.promise) {
-        const opts = {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        };
-
-        cached.promise = mongoose.connect(process.env.MONGO_URI, opts).then((mongoose) => {
-            return mongoose;
-        });
-    }
-
-    try {
-        cached.conn = await cached.promise;
-    } catch (err) {
-        cached.promise = null;
-        throw err;
-    }
-
-    return cached.conn;
+  return mongoose.connect(mongoUri, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+    .then(() => {
+      console.log('✅ MongoDB connected');
+    })
+    .catch((err) => {
+      console.error('❌ MongoDB connection error:', err.message);
+      process.exit(1); // stop app if DB fails
+    });
 }
 
 module.exports = dbConnect;
-
-
