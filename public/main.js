@@ -54,16 +54,40 @@ form.addEventListener('submit', async (e) => {
 	for (const [k, v] of formData.entries()) payload[k] = v;
 
 	// Client-side validation
+	// Mobile
 	if (!/^\d{10}$/.test((payload.mobile||'').replace(/\D/g,''))){
 		showToast('Please enter a valid 10 digit mobile number');
 		return;
 	}
-	if (!payload.username || payload.username.trim().length === 0){
-		showToast('Please enter a username');
+
+	// Name fields: letters only
+	const nameFields = ['firstName','lastName','street','city','state','country'];
+	for (const f of nameFields) {
+		if (payload[f] && !/^[A-Za-z\s'-]+$/.test(payload[f].trim())) {
+			showToast(`${f} can only contain letters and basic punctuation`);
+			return;
+		}
+	}
+
+	// Username: start with letter, letters and digits only
+	if (!payload.username || !/^[A-Za-z][A-Za-z0-9]*$/.test(payload.username)) {
+		showToast('Username must start with a letter and contain only letters and digits');
 		return;
 	}
-	if (!payload.password || payload.password.length < 6){
-		showToast('Password must be at least 6 characters');
+
+	// Password: min 8, one upper, one lower, one number, one special (not start/end)
+	const pwd = payload.password || '';
+	if (pwd.length < 8) {
+		showToast('Password must be at least 8 characters');
+		return;
+	}
+	if (!/[A-Z]/.test(pwd)) { showToast('Password must include at least one uppercase letter'); return; }
+	if (!/[a-z]/.test(pwd)) { showToast('Password must include at least one lowercase letter'); return; }
+	if (!/[0-9]/.test(pwd)) { showToast('Password must include at least one number'); return; }
+	if (!/[!@#\$%\^&\*\(\)\-_=+\[\]\{\};:'",.<>\/?\\|`~]/.test(pwd)) { showToast('Password must include at least one special character'); return; }
+	// special char must not be first or last
+	if (/^[!@#\$%\^&\*\(\)\-_=+\[\]\{\};:'",.<>\/?\\|`~]/.test(pwd) || /[!@#\$%\^&\*\(\)\-_=+\[\]\{\};:'",.<>\/?\\|`~]$/.test(pwd)) {
+		showToast('Special character must not be the first or last character of the password');
 		return;
 	}
 
