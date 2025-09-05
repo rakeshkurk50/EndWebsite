@@ -69,6 +69,18 @@ form.addEventListener('submit', async (e) => {
 		}
 	}
 
+	// Address: letters only, show inline error below field
+	const addressErrorEl = document.getElementById('addressError');
+	if (payload.address && !/^[A-Za-z\s'-]+$/.test(payload.address.trim())) {
+		if (addressErrorEl) {
+			addressErrorEl.textContent = 'Address can only contain letters and basic punctuation';
+			addressErrorEl.style.display = 'block';
+		}
+		return;
+	} else {
+		if (addressErrorEl) { addressErrorEl.textContent = ''; addressErrorEl.style.display = 'none'; }
+	}
+
 	// Username: start with letter, letters and digits only
 	if (!payload.username || !/^[A-Za-z][A-Za-z0-9]*$/.test(payload.username)) {
 		showToast('Username must start with a letter and contain only letters and digits');
